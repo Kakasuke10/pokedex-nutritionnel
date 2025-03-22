@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Card, 
@@ -32,8 +33,8 @@ import {
   Heart,
   Fish,
   Sun,
-  Male as MaleIcon,
-  Female as FemaleIcon
+  UserCircle2,
+  CircleUser
 } from "lucide-react";
 
 const placeholderProfiles = [
@@ -137,14 +138,14 @@ export default function ProfilesPage() {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="femme" id="femme" />
                         <Label htmlFor="femme" className="flex items-center gap-1.5">
-                          <FemaleIcon size={16} />
+                          <CircleUser size={16} className="text-pink-500" />
                           Femme
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="homme" id="homme" />
                         <Label htmlFor="homme" className="flex items-center gap-1.5">
-                          <MaleIcon size={16} />
+                          <UserCircle2 size={16} className="text-blue-500" />
                           Homme
                         </Label>
                       </div>
@@ -240,8 +241,8 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
   };
   
   const genderIcon = profile.sexe === "homme" ? 
-    <MaleIcon size={14} className="text-blue-500" /> : 
-    <FemaleIcon size={14} className="text-pink-500" />;
+    <UserCircle2 size={14} className="text-blue-500" /> : 
+    <CircleUser size={14} className="text-pink-500" />;
   
   const weightString = (
     <span className="flex items-center gap-1">
