@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,8 @@ import {
   Salad,
   Banana,
   Cherry,
-  Droplets
+  Droplets,
+  Sun
 } from "lucide-react";
 
 // Placeholder data - will be replaced with Supabase data

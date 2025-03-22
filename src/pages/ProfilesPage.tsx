@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, 
@@ -32,12 +31,11 @@ import {
   Check,
   Heart,
   Fish,
-  Mars,
-  Venus,
-  SunMedium
+  Sun,
+  Male as MaleIcon,
+  Female as FemaleIcon
 } from "lucide-react";
 
-// Placeholder data - will be replaced with Supabase data
 const placeholderProfiles = [
   {
     id: "1",
@@ -104,7 +102,6 @@ export default function ProfilesPage() {
       </section>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Add new profile card */}
         <Card className="border border-dashed border-muted-foreground/30 bg-background hover:border-muted-foreground/50 transition-all-200">
           <CardContent className="p-0">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -140,14 +137,14 @@ export default function ProfilesPage() {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="femme" id="femme" />
                         <Label htmlFor="femme" className="flex items-center gap-1.5">
-                          <Venus size={16} />
+                          <FemaleIcon size={16} />
                           Femme
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="homme" id="homme" />
                         <Label htmlFor="homme" className="flex items-center gap-1.5">
-                          <Mars size={16} />
+                          <MaleIcon size={16} />
                           Homme
                         </Label>
                       </div>
@@ -178,7 +175,7 @@ export default function ProfilesPage() {
                       
                       <div className="space-y-2">
                         <Label htmlFor="vitaminD" className="text-sm flex items-center gap-1.5">
-                          <SunMedium size={14} />
+                          <Sun size={14} />
                           Vitamine D (μg)
                         </Label>
                         <Input id="vitaminD" type="number" placeholder="μg/jour" defaultValue={10} />
@@ -199,7 +196,6 @@ export default function ProfilesPage() {
           </CardContent>
         </Card>
         
-        {/* Profile cards */}
         {profiles.map(profile => (
           <ProfileCard 
             key={profile.id} 
@@ -209,7 +205,6 @@ export default function ProfilesPage() {
         ))}
       </div>
       
-      {/* Delete confirmation dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -244,10 +239,9 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
     return "bg-blue-500";
   };
   
-  // Calculate weight string with icon
   const genderIcon = profile.sexe === "homme" ? 
-    <Mars size={14} className="text-blue-500" /> : 
-    <Venus size={14} className="text-pink-500" />;
+    <MaleIcon size={14} className="text-blue-500" /> : 
+    <FemaleIcon size={14} className="text-pink-500" />;
   
   const weightString = (
     <span className="flex items-center gap-1">
@@ -319,7 +313,7 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
           <div className="space-y-1">
             <div className="flex justify-between">
               <div className="flex items-center gap-1.5">
-                <SunMedium size={14} className="text-nutrition-vitamin" />
+                <Sun size={14} className="text-nutrition-vitamin" />
                 <span>Vitamine D</span>
               </div>
               <div className="flex items-center gap-1">
@@ -417,4 +411,3 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
     </Card>
   );
 }
-
