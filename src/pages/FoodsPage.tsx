@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -18,69 +18,30 @@ import {
   Flower
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
-// Placeholder data - will be replaced with Supabase data
-const foodCategories = [
-  { id: "fruits", name: "Fruits" },
-  { id: "legumes", name: "Légumes" },
-  { id: "poissons", name: "Poissons" },
-  { id: "viandes", name: "Viandes" },
-  { id: "oleagineux", name: "Oléagineux" },
-  { id: "cereales", name: "Céréales" },
-  { id: "huiles", name: "Huiles" },
-];
+// Types pour nos données
+interface FoodCategory {
+  id: string;
+  name: string;
+}
 
-const placeholderFoods = [
-  {
-    id: "1",
-    nom: "Avocat",
-    categorie: "fruits",
-    image_url: "https://images.unsplash.com/photo-1551460226-a5b8c49a8709?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    proprietes: ["anti-inflammatoire", "riche-omega3"],
-    saisonnalite: "été",
-  },
-  {
-    id: "2",
-    nom: "Saumon",
-    categorie: "poissons",
-    image_url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    proprietes: ["riche-omega3", "riche-vitamine-d"],
-    saisonnalite: null,
-  },
-  {
-    id: "3",
-    nom: "Noix",
-    categorie: "oleagineux",
-    image_url: "https://images.unsplash.com/photo-1611070950847-18a1aace3a7a?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    proprietes: ["anti-inflammatoire", "antioxydant"],
-    saisonnalite: "automne",
-  },
-  {
-    id: "4",
-    nom: "Épinards",
-    categorie: "legumes",
-    image_url: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    proprietes: ["riche-fer", "antioxydant"],
-    saisonnalite: "printemps",
-  },
-  {
-    id: "5",
-    nom: "Myrtilles",
-    categorie: "fruits",
-    image_url: "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    proprietes: ["antioxydant", "neuroprotecteur"],
-    saisonnalite: "été",
-  },
-  {
-    id: "6",
-    nom: "Huile d'olive",
-    categorie: "huiles",
-    image_url: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    proprietes: ["anti-inflammatoire", "cardioprotecteur"],
-    saisonnalite: null,
-  },
-];
+interface FoodProperty {
+  id: string;
+  name: string;
+}
 
+interface Food {
+  id: string;
+  nom: string;
+  categorie: string;
+  image_url: string | null;
+  saisonnalite: string | null;
+  proprietes: string[];
+}
+
+// Filtres pour les propriétés
 const filters = [
   { id: "tous", name: "Tous", icon: <Filter size={16} /> },
   { id: "anti-inflammatoire", name: "Anti-inflammatoire", icon: <Flame size={16} /> },
@@ -93,8 +54,63 @@ export default function FoodsPage() {
   const [selectedFilter, setSelectedFilter] = useState("tous");
   const [selectedCategory, setSelectedCategory] = useState("tous");
   
+  // Récupérer les catégories d'aliments
+  const { data: foodCategories = [] } = useQuery({
+    queryKey: ['foodCategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('food_categories')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching food categories:', error);
+        return [];
+      }
+      return data as FoodCategory[];
+    }
+  });
+  
+  // Récupérer les aliments avec leurs propriétés
+  const { data: foods = [], isLoading } = useQuery({
+    queryKey: ['foods'],
+    queryFn: async () => {
+      // Récupérer tous les aliments
+      const { data: foodsData, error: foodsError } = await supabase
+        .from('foods')
+        .select('*');
+      
+      if (foodsError) {
+        console.error('Error fetching foods:', foodsError);
+        return [];
+      }
+      
+      // Pour chaque aliment, récupérer ses propriétés
+      const foodsWithProperties = await Promise.all(
+        foodsData.map(async (food) => {
+          const { data: propertiesData, error: propertiesError } = await supabase
+            .from('food_property_relations')
+            .select('property_id')
+            .eq('food_id', food.id);
+          
+          if (propertiesError) {
+            console.error('Error fetching food properties:', propertiesError);
+            return { ...food, proprietes: [] };
+          }
+          
+          return {
+            ...food,
+            proprietes: propertiesData.map(p => p.property_id)
+          };
+        })
+      );
+      
+      return foodsWithProperties as Food[];
+    }
+  });
+  
   // Filter foods based on search, filter, and category
-  const filteredFoods = placeholderFoods.filter(food => {
+  const filteredFoods = foods.filter(food => {
     const matchesSearch = food.nom.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = selectedFilter === "tous" || food.proprietes.includes(selectedFilter);
     const matchesCategory = selectedCategory === "tous" || food.categorie === selectedCategory;
@@ -157,12 +173,12 @@ export default function FoodsPage() {
         </TabsList>
         
         <TabsContent value="tous" className="mt-0">
-          <FoodGrid foods={filteredFoods} />
+          <FoodGrid foods={filteredFoods} isLoading={isLoading} />
         </TabsContent>
         
         {foodCategories.map(category => (
           <TabsContent key={category.id} value={category.id} className="mt-0">
-            <FoodGrid foods={filteredFoods} />
+            <FoodGrid foods={filteredFoods} isLoading={isLoading} />
           </TabsContent>
         ))}
       </Tabs>
@@ -170,7 +186,15 @@ export default function FoodsPage() {
   );
 }
 
-function FoodGrid({ foods }: { foods: any[] }) {
+function FoodGrid({ foods, isLoading }: { foods: Food[], isLoading: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Chargement des aliments...</p>
+      </div>
+    );
+  }
+  
   if (foods.length === 0) {
     return (
       <div className="text-center py-12">
@@ -188,14 +212,14 @@ function FoodGrid({ foods }: { foods: any[] }) {
   );
 }
 
-function FoodCard({ food }: { food: any }) {
+function FoodCard({ food }: { food: Food }) {
   // Map season to icon
   const seasonIcon = {
     "printemps": <Flower size={16} className="text-green-500" />,
     "été": <Sun size={16} className="text-yellow-500" />,
     "automne": <Cloud size={16} className="text-orange-500" />,
     "hiver": <Snowflake size={16} className="text-blue-500" />
-  }[food.saisonnalite];
+  }[food.saisonnalite || ""];
   
   // Map properties to badge styles
   const getBadgeClass = (property: string) => {
@@ -225,12 +249,27 @@ function FoodCard({ food }: { food: any }) {
     }
   };
   
+  // Récupérer le nom de la catégorie
+  const getCategoryName = (categoryId: string) => {
+    const categoryMap: Record<string, string> = {
+      'fruits': 'Fruits',
+      'legumes': 'Légumes',
+      'poissons': 'Poissons',
+      'viandes': 'Viandes',
+      'oleagineux': 'Oléagineux',
+      'cereales': 'Céréales',
+      'huiles': 'Huiles'
+    };
+    
+    return categoryMap[categoryId] || categoryId;
+  };
+  
   return (
     <Link to={`/aliments/${food.id}`}>
       <Card className="overflow-hidden transition-all hover:shadow-md hover:-translate-y-1 glass-card animate-scale-in">
         <div className="aspect-video relative overflow-hidden">
           <img 
-            src={food.image_url} 
+            src={food.image_url || "/placeholder.svg"} 
             alt={food.nom} 
             className="w-full h-full object-cover"
           />
@@ -245,11 +284,11 @@ function FoodCard({ food }: { food: any }) {
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <Badge variant="outline" className="text-xs capitalize mb-3">
-            {foodCategories.find(c => c.id === food.categorie)?.name || food.categorie}
+            {getCategoryName(food.categorie)}
           </Badge>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex gap-2 flex-wrap">
-          {food.proprietes.map((property: string) => (
+          {food.proprietes.map(property => (
             <Badge 
               key={property} 
               variant="outline" 

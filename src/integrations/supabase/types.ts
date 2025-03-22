@@ -9,7 +9,129 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      food_categories: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      food_properties: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id: string
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      food_property_relations: {
+        Row: {
+          food_id: string
+          property_id: string
+        }
+        Insert: {
+          food_id: string
+          property_id: string
+        }
+        Update: {
+          food_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_property_relations_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_property_relations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "food_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foods: {
+        Row: {
+          categorie: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          nom: string
+          saisonnalite: string | null
+        }
+        Insert: {
+          categorie: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          nom: string
+          saisonnalite?: string | null
+        }
+        Update: {
+          categorie?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          nom?: string
+          saisonnalite?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foods_categorie_fkey"
+            columns: ["categorie"]
+            isOneToOne: false
+            referencedRelation: "food_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foods_saisonnalite_fkey"
+            columns: ["saisonnalite"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          id: string
+          name: string
+        }
+        Insert: {
+          id: string
+          name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
