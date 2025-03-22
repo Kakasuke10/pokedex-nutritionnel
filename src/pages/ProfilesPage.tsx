@@ -30,10 +30,11 @@ import {
   Trash2, 
   Weight, 
   Check,
-  Male,
-  Female,
   Heart,
-  Fish
+  Fish,
+  Mars,
+  Venus,
+  SunMedium
 } from "lucide-react";
 
 // Placeholder data - will be replaced with Supabase data
@@ -139,14 +140,14 @@ export default function ProfilesPage() {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="femme" id="femme" />
                         <Label htmlFor="femme" className="flex items-center gap-1.5">
-                          <Female size={16} />
+                          <Venus size={16} />
                           Femme
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="homme" id="homme" />
                         <Label htmlFor="homme" className="flex items-center gap-1.5">
-                          <Male size={16} />
+                          <Mars size={16} />
                           Homme
                         </Label>
                       </div>
@@ -177,7 +178,7 @@ export default function ProfilesPage() {
                       
                       <div className="space-y-2">
                         <Label htmlFor="vitaminD" className="text-sm flex items-center gap-1.5">
-                          <Sun size={14} />
+                          <SunMedium size={14} />
                           Vitamine D (μg)
                         </Label>
                         <Input id="vitaminD" type="number" placeholder="μg/jour" defaultValue={10} />
@@ -245,8 +246,8 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
   
   // Calculate weight string with icon
   const genderIcon = profile.sexe === "homme" ? 
-    <Male size={14} className="text-blue-500" /> : 
-    <Female size={14} className="text-pink-500" />;
+    <Mars size={14} className="text-blue-500" /> : 
+    <Venus size={14} className="text-pink-500" />;
   
   const weightString = (
     <span className="flex items-center gap-1">
@@ -318,7 +319,7 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
           <div className="space-y-1">
             <div className="flex justify-between">
               <div className="flex items-center gap-1.5">
-                <Sun size={14} className="text-nutrition-vitamin" />
+                <SunMedium size={14} className="text-nutrition-vitamin" />
                 <span>Vitamine D</span>
               </div>
               <div className="flex items-center gap-1">
@@ -416,3 +417,4 @@ function ProfileCard({ profile, onDeleteClick }: { profile: any, onDeleteClick: 
     </Card>
   );
 }
+
